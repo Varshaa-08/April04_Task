@@ -1,25 +1,24 @@
-# backend.py (FastAPI Backend)
 from fastapi import FastAPI
 from pydantic import BaseModel
-from typing import List
-import uvicorn
 
 app = FastAPI()
 
-data_store = []  # Temporary storage
+# In-memory storage
+user_data = []
 
-class UserData(BaseModel):
+class User(BaseModel):
     username: str
     age: int
 
 @app.post("/submit/")
-def submit_data(user: UserData):
-    data_store.append(user)
+async def submit_data(user: User):
+    user_data.append(user.dict())
     return {"message": "Data submitted successfully"}
 
-@app.get("/data/", response_model=List[UserData])
-def get_data():
-    return data_store
+@app.get("/data/")
+async def get_data():
+    return {"data": user_data}  # Ensure it always returns a dictionary
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
